@@ -38,8 +38,8 @@ if uploaded_file and DEEPL_API_KEY:
         st.write(valid_columns)
 
         # --- Language selection ---
-        source_lang = st.text_input("🌍 Source language (e.g., FR)", "FR")
-        target_lang = st.text_input("🌍 Target language (e.g., NL)", "NL")
+        source_lang = st.text_input("🌍 Enter source language (e.g., EN)", "")
+        target_lang = st.text_input("🌍 Target language (e.g., DE)", "")
 
         # --- Load workbook from memory ---
         in_memory_file = io.BytesIO(uploaded_file.getbuffer())
@@ -82,11 +82,6 @@ if uploaded_file and DEEPL_API_KEY:
                         target_cell.value = f"ERROR: {e}"
                         target_cell.alignment = wrap_alignment
 
-            # Write translated header
-            header_cell = ws.cell(row=2, column=col_idx + 1)
-            header_cell.value = f"{col_name} (translated)"
-            header_cell.alignment = wrap_alignment
-
         # --- Column buttons ---
         st.markdown("### ✏️ Choose columns to translate:")
         col_buttons = {}
@@ -104,10 +99,12 @@ if uploaded_file and DEEPL_API_KEY:
             for col in valid_columns:
                 translate_column(col)
 
-        # --- Check for any translations before download ---
+        # --- Check if any translations were made ---
         has_translations = any(
-            "(translated)" in str(ws.cell(row=2, column=col).value or "")
+            ws.cell(row=row, column=col).value
             for col in range(1, ws.max_column + 1)
+            for row in range(3, ws.max_row + 1)
+            if "(translated)" not in str(ws.cell(row=2, column=col).value or "")
         )
 
         if has_translations:

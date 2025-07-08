@@ -66,23 +66,23 @@ if uploaded_file:
 
             # --- Translation function ---
             def translate_column(col_name):
+                nonlocal translation_done
                 st.write(f"🔁 Translating: **{col_name}**")
                 col_idx = get_col_index(2, col_name)
                 if not col_idx:
                     st.error(f"Column '{col_name}' not found.")
                     return
-
+            
                 translator = deepl.Translator(DEEPL_API_KEY)
-
+            
                 for row in range(3, ws.max_row + 1):  # content starts at row 3
                     source_cell = ws.cell(row=row, column=col_idx)
                     target_cell = ws.cell(row=row, column=col_idx + 1)
-
+            
                     if source_cell.value:
-                        # If overwrite is NO and target has content, skip
                         if overwrite == "No" and target_cell.value not in (None, ""):
                             continue
-
+            
                         try:
                             result = translator.translate_text(
                                 str(source_cell.value),
@@ -91,9 +91,12 @@ if uploaded_file:
                             )
                             target_cell.value = result.text
                             target_cell.alignment = wrap_alignment
+                            translation_done = True  # ✅ mark that a translation was done
                         except Exception as e:
                             target_cell.value = f"ERROR: {e}"
                             target_cell.alignment = wrap_alignment
+                            translation_done = True
+
 
             # --- Column buttons ---
             st.markdown("### ✏️ Choose columns to translate:")

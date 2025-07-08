@@ -1,7 +1,6 @@
 import streamlit as st
 import pandas as pd
 import openpyxl
-from openpyxl.utils import get_column_letter
 from openpyxl.styles import Alignment
 import io
 import deepl
@@ -56,6 +55,7 @@ if uploaded_file:
             ws = wb.active  # assumes first sheet
 
             wrap_alignment = Alignment(horizontal="left", vertical="top", wrap_text=True)
+            translation_done = False  # ✅ track if at least one translation was written
 
             # --- Helper to find column index by header (in row 2) ---
             def get_col_index(header_row, target_name):
@@ -72,17 +72,17 @@ if uploaded_file:
                 if not col_idx:
                     st.error(f"Column '{col_name}' not found.")
                     return
-            
+
                 translator = deepl.Translator(DEEPL_API_KEY)
-            
+
                 for row in range(3, ws.max_row + 1):  # content starts at row 3
                     source_cell = ws.cell(row=row, column=col_idx)
                     target_cell = ws.cell(row=row, column=col_idx + 1)
-            
+
                     if source_cell.value:
                         if overwrite == "No" and target_cell.value not in (None, ""):
                             continue
-            
+
                         try:
                             result = translator.translate_text(
                                 str(source_cell.value),
@@ -91,12 +91,11 @@ if uploaded_file:
                             )
                             target_cell.value = result.text
                             target_cell.alignment = wrap_alignment
-                            translation_done = True  # ✅ mark that a translation was done
+                            translation_done = True
                         except Exception as e:
                             target_cell.value = f"ERROR: {e}"
                             target_cell.alignment = wrap_alignment
                             translation_done = True
-
 
             # --- Column buttons ---
             st.markdown("### ✏️ Choose columns to translate:")
@@ -115,15 +114,8 @@ if uploaded_file:
                 for col in valid_columns:
                     translate_column(col)
 
-            # --- Check if any translations before download ---
-            has_translations = any(
-                ws.cell(row=row, column=col).value
-                for col in range(1, ws.max_column + 1)
-                for row in range(3, ws.max_row + 1)
-            )
-
-            if has_translations:
-                # Name output based on original filename
+            # --- Download only if something was translated ---
+            if translation_done:
                 base_filename = os.path.splitext(uploaded_file.name)[0]
                 output_filename = f"{base_filename}_translated.xlsx"
 

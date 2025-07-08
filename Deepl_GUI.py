@@ -5,6 +5,7 @@ from openpyxl.utils import get_column_letter
 from openpyxl.styles import Alignment
 import io
 import deepl
+import os
 
 # --- Page config ---
 st.set_page_config(page_title="DeepL Excel Translator", layout="centered")
@@ -17,6 +18,9 @@ DEEPL_API_KEY = st.text_input("🔑 Enter your DeepL API Key", type="password")
 uploaded_file = st.file_uploader("📁 Upload your Excel file (.xlsx or .xlsm)", type=["xlsx", "xlsm"])
 
 if uploaded_file and DEEPL_API_KEY:
+    # Ask overwrite preference
+    overwrite = st.radio("❓ Should we overwrite existing translations?", ["No", "Yes"])
+
     # Read row 2 as header to detect columns
     df_headers = pd.read_excel(uploaded_file, header=1, nrows=0, engine="openpyxl")  # row 2 = header
     column_names = list(df_headers.columns)
@@ -62,14 +66,18 @@ if uploaded_file and DEEPL_API_KEY:
             if not col_idx:
                 st.error(f"Column '{col_name}' not found.")
                 return
-        
+
             translator = deepl.Translator(DEEPL_API_KEY)
-        
-            for row in range(3, ws.max_row + 1):  # ✅ content starts at row 3
+
+            for row in range(3, ws.max_row + 1):  # content starts at row 3
                 source_cell = ws.cell(row=row, column=col_idx)
                 target_cell = ws.cell(row=row, column=col_idx + 1)
-        
-                if source_cell.value and not target_cell.value:
+
+                if source_cell.value:
+                    # If overwrite is NO and target has content, skip
+                    if overwrite == "No" and target_cell.value not in (None, ""):
+                        continue
+
                     try:
                         result = translator.translate_text(
                             str(source_cell.value),
@@ -81,7 +89,6 @@ if uploaded_file and DEEPL_API_KEY:
                     except Exception as e:
                         target_cell.value = f"ERROR: {e}"
                         target_cell.alignment = wrap_alignment
-
 
         # --- Column buttons ---
         st.markdown("### ✏️ Choose columns to translate:")
@@ -100,20 +107,23 @@ if uploaded_file and DEEPL_API_KEY:
             for col in valid_columns:
                 translate_column(col)
 
-        # --- Check if any translations were made ---
+        # --- Check for any translations before download ---
         has_translations = any(
             ws.cell(row=row, column=col).value
             for col in range(1, ws.max_column + 1)
             for row in range(3, ws.max_row + 1)
-            if "(translated)" not in str(ws.cell(row=2, column=col).value or "")
         )
 
         if has_translations:
+            # Name output based on original filename
+            base_filename = os.path.splitext(uploaded_file.name)[0]
+            output_filename = f"{base_filename}_translated.xlsx"
+
             output = io.BytesIO()
             wb.save(output)
             st.download_button(
                 label="📥 Download Translated File",
                 data=output.getvalue(),
-                file_name="translated_output.xlsx",
+                file_name=output_filename,
                 mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
             )

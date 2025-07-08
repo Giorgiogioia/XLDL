@@ -8,7 +8,7 @@ import deepl
 
 # --- Page config ---
 st.set_page_config(page_title="DeepL Excel Translator", layout="centered")
-st.title("📄 DeepL Excel Translator (Side-by-Side In-Place)")
+st.title("📄 DeepL Excel Translator")
 
 # --- API key input ---
 DEEPL_API_KEY = st.text_input("🔑 Enter your DeepL API Key", type="password")
@@ -38,8 +38,8 @@ if uploaded_file and DEEPL_API_KEY:
         st.write(valid_columns)
 
         # --- Language selection ---
-        source_lang = st.text_input("🌍 Source language (e.g., FR)", "FR")
-        target_lang = st.text_input("🌍 Target language (e.g., NL)", "NL")
+        source_lang = st.text_input("🌍 Enter source language code (e.g., FR)", "")
+        target_lang = st.text_input("🌍 Enter target language code (e.g., NL)", "")
 
         # --- Load workbook from memory ---
         in_memory_file = io.BytesIO(uploaded_file.getbuffer())

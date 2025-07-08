@@ -62,13 +62,13 @@ if uploaded_file and DEEPL_API_KEY:
             if not col_idx:
                 st.error(f"Column '{col_name}' not found.")
                 return
-
+        
             translator = deepl.Translator(DEEPL_API_KEY)
-
-            for row in range(3, ws.max_row + 1):  # content starts at row 3
+        
+            for row in range(3, ws.max_row + 1):  # ✅ content starts at row 3
                 source_cell = ws.cell(row=row, column=col_idx)
                 target_cell = ws.cell(row=row, column=col_idx + 1)
-
+        
                 if source_cell.value and not target_cell.value:
                     try:
                         result = translator.translate_text(
@@ -81,6 +81,7 @@ if uploaded_file and DEEPL_API_KEY:
                     except Exception as e:
                         target_cell.value = f"ERROR: {e}"
                         target_cell.alignment = wrap_alignment
+
 
         # --- Column buttons ---
         st.markdown("### ✏️ Choose columns to translate:")

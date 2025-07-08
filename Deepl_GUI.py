@@ -66,7 +66,7 @@ if uploaded_file:
 
             # --- Translation function ---
             def translate_column(col_name):
-                nonlocal translation_done
+                global translation_done
                 st.write(f"🔁 Translating: **{col_name}**")
                 col_idx = get_col_index(2, col_name)
                 if not col_idx:

@@ -38,8 +38,8 @@ if uploaded_file and DEEPL_API_KEY:
         st.write(valid_columns)
 
         # --- Language selection ---
-        source_lang = st.text_input("🌍 Enter source language (e.g., EN)", "")
-        target_lang = st.text_input("🌍 Target language (e.g., DE)", "")
+        source_lang = st.text_input("🌍 Source language (e.g., FR)", "FR")
+        target_lang = st.text_input("🌍 Target language (e.g., NL)", "NL")
 
         # --- Load workbook from memory ---
         in_memory_file = io.BytesIO(uploaded_file.getbuffer())

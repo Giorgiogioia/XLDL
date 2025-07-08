@@ -17,9 +17,16 @@ DEEPL_API_KEY = st.text_input("🔑 Enter your DeepL API Key", type="password")
 # --- Upload file ---
 uploaded_file = st.file_uploader("📁 Upload your Excel file (.xlsx or .xlsm)", type=["xlsx", "xlsm"])
 
-if uploaded_file and DEEPL_API_KEY:
-    # Ask overwrite preference
-    overwrite = st.radio("❓ Should we overwrite existing translations?", ["No", "Yes"])
+if uploaded_file:
+    st.markdown("### 🔧 Translation Settings")
+
+    # Ask overwrite preference right after file is uploaded
+    overwrite = st.radio("❓ Should we overwrite existing translations?", ["No", "Yes"], index=0)
+
+    if not DEEPL_API_KEY:
+        st.warning("Please enter your DeepL API key to continue.")
+    else:
+        # continue with translation logic here...
 
     # Read row 2 as header to detect columns
     df_headers = pd.read_excel(uploaded_file, header=1, nrows=0, engine="openpyxl")  # row 2 = header

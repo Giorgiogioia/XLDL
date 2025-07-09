@@ -33,7 +33,7 @@ if uploaded_file:
         master_labels = [
             "Title - Master",
             "Product Description - Master",
-            "Backend KW"
+            "Backend KW - 500 Characters"
         ] + [f"Bullet Point {i} - Master" for i in range(1, 10)]
 
         # Filter only those present in the file

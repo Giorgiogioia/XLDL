@@ -6,20 +6,19 @@ import io
 import deepl
 import os
 
-# --- Page config ---
+
 st.set_page_config(page_title="DeepL Excel Translator", layout="centered")
 st.title("📄 DeepL Excel Translator")
 
-# --- API key input ---
+
 DEEPL_API_KEY = st.text_input("🔑 Enter your DeepL API Key", type="password")
 
-# --- Upload file ---
+
 uploaded_file = st.file_uploader("📁 Upload your Excel file (.xlsx or .xlsm)", type=["xlsx", "xlsm"])
 
 if uploaded_file:
     st.markdown("### 🔧 Translation Settings")
 
-    # Ask overwrite preference right after file is uploaded
     overwrite = st.radio("❓ Should we overwrite existing translations?", ["No", "Yes"], index=0)
 
     if not DEEPL_API_KEY:
@@ -97,7 +96,7 @@ if uploaded_file:
                             target_cell.alignment = wrap_alignment
                             translation_done = True
 
-            # --- Column buttons ---
+        
             st.markdown("### ✏️ Choose columns to translate:")
             col_buttons = {}
             for col in valid_columns:
@@ -105,7 +104,7 @@ if uploaded_file:
 
             translate_all = st.button("🌍 Translate All Content")
 
-            # --- Execute translation ---
+    
             for col in valid_columns:
                 if col_buttons[col]:
                     translate_column(col)
@@ -114,7 +113,7 @@ if uploaded_file:
                 for col in valid_columns:
                     translate_column(col)
 
-            # --- Download only if something was translated ---
+        
             if translation_done:
                 base_filename = os.path.splitext(uploaded_file.name)[0]
                 output_filename = f"{base_filename}_translated.xlsx"
